@@ -16,3 +16,4 @@ print("module load intel/18.0.1 impi/18.0.1 mkl/18.0.1")
 
 print("cd $SLURM_SUBMIT_DIR")
 print("job command here")
+print('beyonce')
