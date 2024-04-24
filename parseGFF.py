@@ -1,30 +1,59 @@
 import argparse
+import csv
+from Bio import SeqIO
+from Bio.Seq import Seq
 
 def get_args():
     #create an argumentparser object
-    parser= argparse.ArgumentParser(description='This script return the two fileand read line by line')
-    #making three functions for getting input, calculating fibonacci and printing:
-    #add positional arguments(these are the ones that are absoultely essential/required)
-    parser.add_argument("filegff", help= "the gff file you want to open")
-    parser.add_argument("filefasta", help= "the fasta file you want to open")
-    args= parser.parse_args()
-    return args
+    parser= argparse.ArgumentParser(description='This script parses and does some \
+        neat stuff with a GFF file')
+    parser.add_argument("gff", help="name of gff file")
+    parser.add_argument("fasta", help= "name of fasta file")
+    return parser.parse_args()
+
+    
+
+def parse_fasta():
+    #read and parse the FASTA file
+    #read() assumes one seq only in the fasta file
+    return SeqIO.read(args.fasta, 'fasta')
+def revcomp(seq):
+    return seq.reverse_compliment()
+
+def parse_gff(genome_object):
+    genome_sequence= genome_object.seq
+
+    #read the gff file line by line
+    with open(args.gff, 'r') as gff_file:
+        #create a csv csv reader object 
+        reader= csv.reader(gff_file, delimiter="\t")
+        #read the actual lines
+        for line in reader:
+            organism        = line[0]
+            feature_type    = line[2]
+            start           = int(line[3])
+            end             = int(line[4])
+            strand          = line[6]
+            attributes      = line[-1]
+            if feature_type == 'CDS':
+                print(feature_type)
+                #extract the sequence of this feature from the genome
+                feature_seq= genome_sequence [start-1:end]
+                if strand == '-':
+                    feature_seq= revcomp(feature_seq)
+                #print fasta nucleotide sequence for this gene 
+                #print(len(feature_seq))
+
 def main():
-    args = get_args()
+    genome_sequence= parse_fasta()
+    parse_gff(genome_sequence)
 
-    with open(args.filegff, "r") as filegff:
-        for line in filegff:
-            line = line.strip()  # Strip newlines
-            parts = line.split('\t')  # Split the line into columns based on tabs
-            # Extract the start and end positions
-            start = int(parts[3])
-            end = int(parts[4])
-            feature_length = end - start + 1  # Calculate feature length
-            print(f'Feature Length: {feature_length}')  # Print the length of the feature
 
-    # Open the FASTA file
-    with open(args.filefasta, "r") as filefasta:
-        pass
 
+#get the command line arguments
+args= get_args()
+
+
+#set the env for this script
 if __name__ == "__main__":
     main()
